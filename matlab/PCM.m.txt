@@ -1,0 +1,54 @@
+clc;
+clear;
+close all;
+
+% Original signal
+t = 0:0.01:1;
+x = sin(2*pi*5*t);
+
+% Sampling
+Fs = 50;
+ts = 0:1/Fs:1;
+xs = sin(2*pi*5*ts);
+
+% PCM Modulation (4 bits/sample)
+n = 4;
+L = 2^n;
+Delta = 2/L;
+xq = round((xs + 1)/Delta);
+xq = min(max(xq, 0), L-1);
+
+% Binary encoding
+bits = dec2bin(xq, n) - '0';
+
+% PCM Demodulation
+xr = xq*Delta + Delta/2 - 1;
+
+% Plot signals
+subplot(4,1,1);
+plot(t,x);
+hold on;
+stem(ts,xs);
+title('Original and Sampled Signal');
+legend('Original','Sampled');
+
+subplot(4,1,2);
+stairs(ts,xr);
+
+title('PCM Quantized ');
+
+subplot(4,1,3);
+stairs(reshape(bits',1,[]));
+title('PCM Transmitted Bitstream');
+xlim([0 200]);
+ylim([-0.5 1.5]);
+
+subplot(4,1,4);
+stairs(ts,xr,'r');
+hold on;
+plot(t,x,'b');
+title('PCM Demodulated and Reconstructed Signal');
+xlabel('Time (s)');
+ylabel('Amplitude');
+legend('Reconstructed','Original');
+grid on;

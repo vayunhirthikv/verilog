@@ -1,0 +1,59 @@
+clear; clc; close all;
+
+N = 2000;
+EbNo = 15;
+M4 = 4;
+M16 = 16;
+
+data_bpsk = randi([0 1], N, 1);
+tx_bpsk = 2*data_bpsk - 1;
+snr_bpsk = EbNo;
+rx_bpsk = awgn(tx_bpsk, snr_bpsk, 'measured');
+
+data_qpsk = randi([0 M4-1], N, 1);
+tx_qpsk = pskmod(data_qpsk, M4, pi/4);
+snr_qpsk = EbNo + 10*log10(log2(M4));
+rx_qpsk = awgn(tx_qpsk, snr_qpsk, 'measured');
+
+data_qam = randi([0 M16-1], N, 1);
+tx_qam = qammod(data_qam, M16, 'UnitAveragePower', true);
+snr_qam = EbNo + 10*log10(log2(M16));
+rx_qam = awgn(tx_qam, snr_qam, 'measured');
+
+figure('Position', [100 100 1400 400]);
+
+subplot(1,3,1);
+plot(real(rx_bpsk), imag(rx_bpsk), 'b.'); hold on;
+plot([-1 1], [0 0], 'ro', 'MarkerFaceColor', 'r', 'MarkerSize', 8);
+xline(0, 'k--', 'LineWidth', 1.5);
+grid on; axis equal;
+xlim([-2 2]); ylim([-2 2]);
+title('BPSK Constellation');
+xlabel('In-Phase'); ylabel('Quadrature');
+
+subplot(1,3,2);
+plot(real(rx_qpsk), imag(rx_qpsk), 'b.'); hold on;
+ref_qpsk = pskmod(0:M4-1, M4, pi/4);
+plot(real(ref_qpsk), imag(ref_qpsk), 'ro', 'MarkerFaceColor', 'r', 'MarkerSize', 8);
+xline(0, 'k--', 'LineWidth', 1.5);
+yline(0, 'k--', 'LineWidth', 1.5);
+grid on; axis equal;
+xlim([-2 2]); ylim([-2 2]);
+title('QPSK Constellation');
+xlabel('In-Phase'); ylabel('Quadrature');
+
+subplot(1,3,3);
+plot(real(rx_qam), imag(rx_qam), 'b.'); hold on;
+ref_qam = qammod(0:M16-1, M16, 'UnitAveragePower', true);
+plot(real(ref_qam), imag(ref_qam), 'ro', 'MarkerFaceColor', 'r', 'MarkerSize', 8);
+lvl = [-2/3 0 2/3] * max(abs(real(ref_qam))) * 1.5;
+for k = 1:length(lvl)
+    xline(lvl(k), 'k--', 'LineWidth', 1);
+    yline(lvl(k), 'k--', 'LineWidth', 1);
+end
+grid on; axis equal;
+xlim([-2 2]); ylim([-2 2]);
+title('16-QAM Constellation');
+xlabel('In-Phase'); ylabel('Quadrature');
+
+sgtitle('Signal Constellations with Decision Boundaries');

@@ -1,0 +1,52 @@
+clc;
+clear;
+close all;
+
+% Input data
+data = 'aaaabbbccc';
+
+% Initial dictionary
+symbols = unique(data);
+dict = cell(1,length(symbols));
+
+for i = 1:length(symbols)
+    dict{i} = symbols(i);
+end
+
+% LZW encoding
+w = '';
+output = [];
+
+for i = 1:length(data)
+    c = data(i);
+    wc = [w c];
+
+    if any(cellfun(@(x) isequal(x,wc),dict))
+        w = wc;
+    else
+        output(end+1) = find(cellfun(@(x) isequal(x,w),dict))-1;
+        dict{end+1} = wc;
+        w = c;
+    end
+end
+
+% Output last code
+if ~isempty(w)
+    output(end+1) = find(cellfun(@(x) isequal(x,w),dict))-1;
+end
+
+% Display results
+disp('Input data:');
+disp(data);
+
+disp('LZW encoded output:');
+disp(output);
+
+disp('LZW Dictionary:');
+for i = 1:length(dict)
+    fprintf('%d : %s\n',i-1,dict{i});
+end
+
+fprintf('Original size = %d bits\n',length(data)*8);
+fprintf('Compressed size = %d bits (using fixed-width codes)\n', ...
+    length(output)*ceil(log2(length(dict))));

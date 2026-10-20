@@ -1,0 +1,85 @@
+clc;
+clear;
+close all;
+
+% Parameters
+n = 7;
+k = 4;
+g = [1 0 1 1];    % Generator polynomial
+
+% Input data
+data = [1 0 1 1];
+
+% Encoding (Systematic)
+msg = [data zeros(1,n-k)];
+temp = msg;
+
+for i = 1:k
+    if temp(i) == 1
+        temp(i:i+length(g)-1) = ...
+            mod(temp(i:i+length(g)-1)+g,2);
+    end
+end
+
+rem = temp(k+1:end);
+code = [data rem];
+
+disp('Encoded Codeword:');
+disp(code);
+
+% Add error at position 5
+rx = code;
+rx(5) = mod(rx(5)+1,2);
+
+disp('Received Codeword:');
+disp(rx);
+
+% Syndrome calculation using modulo-2 division
+temp = rx;
+
+for i = 1:k
+    if temp(i) == 1
+        temp(i:i+length(g)-1) = ...
+            mod(temp(i:i+length(g)-1)+g,2);
+    end
+end
+
+S = temp(end-(n-k)+1:end);
+
+disp('Syndrome:');
+disp(S);
+
+% Find error position using syndrome table
+err = zeros(1,n);
+
+for i = 1:n
+    e = zeros(1,n);
+    e(i) = 1;
+    temp = e;
+
+    for j = 1:n-length(g)+1
+        if temp(j) == 1
+            temp(j:j+length(g)-1) = ...
+                mod(temp(j:j+length(g)-1)+g,2);
+        end
+    end
+
+    s = temp(end-(n-k)+1:end);
+
+    if isequal(s,S)
+        err(i) = 1;
+        break;
+    end
+end
+
+% Error correction
+corrected = mod(rx+err,2);
+
+disp('Corrected Codeword:');
+disp(corrected);
+
+% Decoding (systematic code)
+decoded = corrected(1:k);
+
+disp('Decoded Data:');
+disp(decoded);

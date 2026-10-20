@@ -1,0 +1,55 @@
+clc;
+clear;
+close all;
+
+% Parameters
+n = 7;
+k = 4;
+
+P = [1 1 0;
+     1 0 1;
+     0 1 1;
+     1 1 1];
+
+G = [P eye(k)];
+H = [eye(n-k) P'];
+%disp(P);
+
+% Input data
+data = [1 0 1 1];
+
+% Encoding
+code = mod(data*G,2);
+disp('Encoded Codeword:');
+disp(code);
+
+% Add error at position 3
+rx = code;
+rx(3) = mod(rx(3)+1,2);
+
+disp('Received Codeword:');
+disp(rx);
+
+% Syndrome calculation
+S = mod(rx*H',2);
+disp('Syndrome:');
+disp(S);
+
+% Error correction
+for i = 1:n
+    e = zeros(1,n);
+    e(i) = 1;
+
+    if isequal(mod(e*H',2),S)
+        rx(i) = mod(rx(i)+1,2);
+        break;
+    end
+end
+
+disp('Corrected Codeword:');
+disp(rx);
+
+% Decoding
+decoded = rx(n-k+1:end);
+disp('Decoded Data:');
+disp(decoded);

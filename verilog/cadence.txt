@@ -5,7 +5,7 @@ virtuoso
 file->new->library->give name ->attach to existing technology
 ->apply->gpdk090->apply
 
-file->new->cell view
+file->new->cell view->choose our library
 
 instance i
 right side connect to arrow
@@ -22,12 +22,23 @@ instance->analogLib->vpulse(ip) vdc(vdd) gnd create pins
 launch->first option
 
 
-
+clock false uncomment
 csg 324
 -1
-Artix 7
+Artix 7  boolean-sparton
 
 last 100
 
 simulation sources-->tb
 run simulation->behavorial simulation
+
+
+curl.exe -L https://github.com/vayunhirthikv/verilog/archive/refs/heads/main.zip -o verilog.zip
+
+
+close->click cell view->ok
+launch->6th option->start up action->ok->ok
+connectivity->generate->all from source->position:minimum seperation : 0.12->tick in boundary
+                        I/O pins: blue color ->apply
+                        Pr boundary: change to width: 5  
+                        -> ok

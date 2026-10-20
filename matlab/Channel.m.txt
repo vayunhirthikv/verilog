@@ -1,0 +1,33 @@
+clc;
+clear;
+close all;
+
+B = [1000 2000 5000 10000 20000];
+SNR_dB = [0 5 10 15 20 25 30];
+
+SNR = 10.^(SNR_dB/10);
+
+% Calculate channel capacity
+C = zeros(length(B),length(SNR));
+
+for i = 1:length(B)
+    C(i,:) = B(i)*log2(1+SNR);
+end
+
+% Graph 1: Capacity vs SNR
+figure;
+plot(SNR_dB,C,'-o','LineWidth',1.5);
+xlabel('SNR (dB)');
+ylabel('Capacity (bits/sec)');
+title('Capacity vs SNR');
+legend('1 kHz','2 kHz','5 kHz','10 kHz','20 kHz');
+grid on;
+
+% Graph 2: Capacity vs Bandwidth
+figure;
+plot(B,C','-o','LineWidth',1.5);
+xlabel('Bandwidth (Hz)');
+ylabel('Capacity (bits/sec)');
+title('Capacity vs Bandwidth');
+legend('0 dB','5 dB','10 dB','15 dB','20 dB','25 dB','30 dB');
+grid on;

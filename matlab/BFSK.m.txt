@@ -1,0 +1,149 @@
+
+clc;
+clear all;
+close all;
+
+Nb = 16;
+Fs = 100;
+f0 = 1;
+f1 = 2;
+
+
+t = 0:1/Fs:Nb-1/Fs;
+
+% Transmitted bits
+data = [1 0 1 1 0 0 0 0 1 1 1 0 1 1 1 1];
+fprintf('Transmitted Bits: ');
+disp(data);
+
+% Message signal
+signal = repelem(data,Fs);
+
+figure(1);
+
+subplot(5,1,1);
+stairs(signal,'LineWidth',1.5);
+axis([0 length(t) -0.5 1.5]);
+title('1. Message Digital Signal');
+xlabel('Samples'); ylabel('Amplitude'); grid on;
+
+% NRZ signal
+nrz = 2*signal - 1;
+
+subplot(5,1,2);
+stairs(nrz,'LineWidth',1.5);
+axis([0 length(t) -1.5 1.5]);
+title('2. NRZ Line Coded Signal');
+xlabel('Samples'); ylabel('Amplitude'); grid on;
+
+% BFSK modulation
+bfsk_signal = zeros(1,length(t));
+
+for k = 1:Nb
+    idx = (k-1)*Fs + (1:Fs);
+    if data(k) == 1
+        bfsk_signal(idx) = cos(2*pi*f1*t(idx));
+    else
+        bfsk_signal(idx) = cos(2*pi*f0*t(idx));
+    end
+end
+
+subplot(5,1,3);
+plot(t,bfsk_signal);
+title('3. BFSK Modulated Signal (No Noise)');
+xlabel('Time (s)'); ylabel('Amplitude'); grid on;
+
+% BFSK demodulation
+rx_bits = zeros(1,Nb);
+r = zeros(1,Nb);
+
+for k = 1:Nb
+    idx = (k-1)*Fs + (1:Fs);
+
+    % Correlator outputs
+    y0 = bfsk_signal(idx).*cos(2*pi*f0*t(idx));
+    y1 = bfsk_signal(idx).*cos(2*pi*f1*t(idx));
+
+    % Integration stage
+    I0 = trapz(t(idx),y0);
+    I1 = trapz(t(idx),y1);
+
+    % Difference of integrator outputs
+    r(k) = I1 - I0;
+
+    % Decision device
+    if r(k) > 0
+        rx_bits(k) = 1;
+    else
+        rx_bits(k) = 0;
+    end
+end
+
+subplot(5,1,4);
+stairs(r,'LineWidth',1.5);
+title('4. Integrator Difference Output');
+xlabel('Time (s)');
+ylabel('I1 - I0');
+xlim([1 16]);
+grid on;
+% Reconstructed signal
+rx = repelem(2*rx_bits-1,Fs);
+
+subplot(5,1,5);
+stairs(rx,'LineWidth',1.5);
+axis([0 length(t) -1.5 1.5]);
+title('5. Reconstructed Signal (No Noise)');
+xlabel('Samples'); ylabel('Amplitude'); grid on;
+
+fprintf('Received Bits (No Noise): ');
+disp(rx_bits);
+fprintf('Bit Errors (No Noise): %d\n',sum(data ~= rx_bits));
+
+% Add AWGN noise
+noise = 0.5*randn(1,length(bfsk_signal));
+bfsk_noisy = bfsk_signal + noise;
+
+figure(2);
+
+subplot(4,1,1);
+plot(t,noise);
+title('6. AWGN Noise');
+xlabel('Time (s)'); ylabel('Amplitude'); grid on;
+
+subplot(4,1,2);
+plot(t,bfsk_noisy);
+title('7. BFSK Signal with Noise');
+xlabel('Time (s)'); ylabel('Amplitude'); grid on;
+
+% Demodulation with noise
+rx_bits_noisy = zeros(1,Nb);
+
+for k = 1:Nb
+    idx = (k-1)*Fs + (1:Fs);
+
+    r0 = sum(bfsk_noisy(idx).*cos(2*pi*f0*t(idx)));
+    r1 = sum(bfsk_noisy(idx).*cos(2*pi*f1*t(idx)));
+
+    if r1 > r0
+        rx_bits_noisy(k) = 1;
+    else
+        rx_bits_noisy(k) = 0;
+    end
+end
+
+subplot(4,1,3);
+stairs(repelem(rx_bits_noisy,Fs),'LineWidth',1.5);
+title('8. Received Bits with Noise');
+xlabel('Samples'); ylabel('Amplitude'); grid on;
+
+recon_noisy = repelem(2*rx_bits_noisy-1,Fs);
+
+subplot(4,1,4);
+stairs(recon_noisy,'LineWidth',1.5);
+axis([0 length(t) -1.5 1.5]);
+title('9. Reconstructed Signal with Noise');
+xlabel('Samples'); ylabel('Amplitude'); grid on;
+
+fprintf('Received Bits (With Noise): ');
+disp(rx_bits_noisy);
+fprintf('Bit Errors (With Noise): %d\n',sum(data ~= rx_bits_noisy));
