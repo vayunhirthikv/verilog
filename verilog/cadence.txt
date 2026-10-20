@@ -1,0 +1,33 @@
+csh
+source /home/install/cshrc
+virtuoso
+
+file->new->library->give name ->attach to existing technology
+->apply->gpdk090->apply
+
+file->new->cell view
+
+instance i
+right side connect to arrow
+
+create pin p   A,B,Vdd,Vss (ip) Vout (out) 
+
+create->cellview->from cell view
+
+file->new->cell name: 1->open with:schematic
+
+instance->library:we created->ake our cell
+ 
+instance->analogLib->vpulse(ip) vdc(vdd) gnd create pins 
+launch->first option
+
+
+
+csg 324
+-1
+Artix 7
+
+last 100
+
+simulation sources-->tb
+run simulation->behavorial simulation
