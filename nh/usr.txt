@@ -1,0 +1,141 @@
+
+`timescale 1ns / 1ps
+
+module usrr(
+    input clk,
+    input rst,
+    input [2:0] control,
+    input leftin,
+    input rightin,
+    input [3:0] parallelin,
+    output leftout,
+    output rightout,
+    output reg [3:0] parallelout
+);
+
+always @(posedge clk or posedge rst) begin
+    if (rst)
+        parallelout <= 4'b0000;
+    else begin
+        case (control)
+
+            3'b000: parallelout <= parallelout;
+            // Hold
+
+            3'b001: parallelout <= {leftin, parallelout[3:1]};
+            // Shift right
+
+            3'b010: parallelout <= {parallelout[2:0], rightin};
+            // Shift left
+
+            3'b011: parallelout <= {leftin, parallelout[3:1]};
+            // Shift right
+
+            3'b100: parallelout <= {parallelout[2:0], rightin};
+            // Shift left
+
+            3'b101: parallelout <= parallelin;
+            // Parallel load
+
+            3'b110: parallelout <= parallelin;
+            // Parallel load
+
+            3'b111: parallelout <= parallelin;
+            // Parallel load
+
+            default: parallelout <= parallelout;
+
+        endcase
+    end
+end
+
+assign leftout  = parallelout[3];
+assign rightout = parallelout[0];
+
+endmodule
+
+
+module tb;
+
+reg clk, rst;
+reg leftin, rightin;
+reg [2:0] control;
+reg [3:0] parallelin;
+
+wire leftout, rightout;
+wire [3:0] parallelout;
+
+usrr uut (
+    .clk(clk),
+    .rst(rst),
+    .leftin(leftin),
+    .rightin(rightin),
+    .parallelin(parallelin),
+    .control(control),
+    .leftout(leftout),
+    .rightout(rightout),
+    .parallelout(parallelout)
+);
+
+// Clock generation: 10 ns period
+always #5 clk = ~clk;
+
+initial begin
+    clk = 0;
+    rst = 1;
+    control = 3'b000;
+    leftin = 0;
+    rightin = 0;
+    parallelin = 4'b0000;
+
+    $monitor("Time=%0t | Reset=%b | Control=%b | ParallelIn=%b | ParallelOut=%b | LeftOut=%b | RightOut=%b",
+             $time, rst, control, parallelin, parallelout, leftout, rightout);
+
+    // Reset
+    #10;
+    rst = 0;
+
+    // Parallel load 1010
+    #10;
+    control = 3'b101;
+    parallelin = 4'b1010;
+
+    // Hold
+    #10;
+    control = 3'b000;
+
+    // Shift right: insert 1 at MSB
+    #10;
+    control = 3'b001;
+    leftin = 1;
+
+    // Shift left: insert 0 at LSB
+    #10;
+    control = 3'b010;
+    rightin = 0;
+
+    // Shift right again
+    #10;
+    control = 3'b011;
+    leftin = 0;
+
+    // Shift left again
+    #10;
+    control = 3'b100;
+    rightin = 1;
+
+    // Parallel load 1100
+    #10;
+    control = 3'b110;
+    parallelin = 4'b1100;
+
+    // Parallel load 0111
+    #10;
+    control = 3'b111;
+    parallelin = 4'b0111;
+
+    #10;
+    $finish;
+end
+
+endmodule

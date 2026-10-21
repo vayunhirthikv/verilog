@@ -1,0 +1,61 @@
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// 
+// Create Date: 21.10.2026 18:23:08
+// Design Name: 
+// Module Name: counter
+// Project Name: 
+// Target Devices: 
+// Tool Versions: 
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+
+
+module counter(clk,rst,mode,count);
+input clk;
+input rst;
+input mode;
+output reg [3:0]count;
+always @(posedge clk or posedge rst)
+begin
+if(rst)
+count<=4'b0000;
+else if(mode)
+count<=count+1;
+else 
+count<=count-1;
+end
+
+endmodule
+
+
+module tb;
+reg clk,rst,mode;
+wire [3:0] count;
+counter uut(.rst(rst),.clk(clk),.mode(mode),.count(count));
+always #5 clk=~clk;
+initial begin
+rst=1;
+clk=0;
+mode=0;
+$monitor("Reset=%b | Mode=%b | Counter =%d",rst,mode,count);
+#10;
+rst=0;
+ 
+ mode=1;
+ #50
+ mode=0;
+ $finish;
+
+
+end
+endmodule
