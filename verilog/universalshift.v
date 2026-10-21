@@ -4,7 +4,9 @@ module usr_4bit (
     input clk,
     input reset,
     input [1:0] sel,
-    input sin_left,//serial input left
+    input sin_left,//serial input l
+    
+    eft
     input sin_right, // serial right
     input [3:0] pdata,
     output reg [3:0] q

@@ -41,7 +41,7 @@ module up_down_counter_tb;
 
     // Clock generation (10 ns period)
     always #5 clk = ~clk;
-
+ 
     // Test sequence
     initial begin
         $display("Time\tReset\tUp_Down\tCount");
