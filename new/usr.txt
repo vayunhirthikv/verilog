@@ -1,0 +1,157 @@
+module usr(
+    input clk, rst,
+    input [3:0] parallel_in,
+    input serial_left, serial_right,
+    input [2:0] mode,
+    output reg [3:0] q,
+    output reg left_out,
+    output reg right_out
+);
+
+always @(posedge clk or posedge rst) begin
+    if (rst) begin
+        q         <= 4'b0000;
+        left_out  <= 1'b0;
+        right_out <= 1'b0;
+    end
+    else begin
+        case (mode)
+
+            3'b000: begin
+                q         <= q;
+                left_out  <= 1'b0;
+                right_out <= 1'b0;
+            end
+
+            3'b001: begin
+                q         <= {serial_left, q[3:1]};
+                right_out <= q[0];
+                left_out  <= 1'b0;
+            end
+
+            3'b010: begin
+                q         <= {q[2:0], serial_right};
+                left_out  <= q[3];
+                right_out <= 1'b0;
+            end
+
+            3'b011: begin
+                q         <= {serial_left, q[3:1]};
+                left_out  <= 1'b0;
+                right_out <= 1'b0;
+            end
+
+            3'b100: begin
+                q         <= {q[2:0], serial_right};
+                left_out  <= 1'b0;
+                right_out <= 1'b0;
+            end
+
+            3'b101: begin
+                q         <= parallel_in;
+                right_out <= parallel_in[0];
+                left_out  <= 1'b0;
+            end
+
+            3'b110: begin
+                q         <= parallel_in;
+                left_out  <= parallel_in[3];
+                right_out <= 1'b0;
+            end
+
+            3'b111: begin
+                q         <= parallel_in;
+                left_out  <= 1'b0;
+                right_out <= 1'b0;
+            end
+
+            default: begin
+                q         <= q;
+                left_out  <= 1'b0;
+                right_out <= 1'b0;
+            end
+
+        endcase
+    end
+end
+
+endmodule
+
+
+module usr_tb;
+
+reg clk, rst;
+reg [3:0] parallel_in;
+reg serial_left, serial_right;
+reg [2:0] mode;
+
+wire [3:0] q;
+wire left_out, right_out;
+
+usr uut (
+    .clk(clk),
+    .rst(rst),
+    .parallel_in(parallel_in),
+    .serial_left(serial_left),
+    .serial_right(serial_right),
+    .mode(mode),
+    .q(q),
+    .left_out(left_out),
+    .right_out(right_out)
+);
+
+always #5 clk = ~clk;
+
+initial begin
+    $monitor("T=%0t mode=%b parallel_in=%b q=%b left_out=%b right_out=%b",
+              $time, mode, parallel_in, q, left_out, right_out);
+
+    clk = 0;
+    rst = 1;
+    mode = 3'b000;
+    parallel_in = 4'b1010;
+    serial_left = 0;
+    serial_right = 0;
+
+    #10 rst = 0;
+
+    // Mode 111: Parallel load
+    mode = 3'b111;
+    #10;
+
+    // Mode 001: Shift right
+    mode = 3'b001;
+    serial_left = 1;
+    #10;
+
+    // Mode 010: Shift left
+    mode = 3'b010;
+    serial_right = 1;
+    #10;
+
+    // Mode 011: Shift right without output
+    mode = 3'b011;
+    #10;
+
+    // Mode 100: Shift left without output
+    mode = 3'b100;
+    #10;
+
+    // Mode 101: Parallel load with right output
+    parallel_in = 4'b1101;
+    mode = 3'b101;
+    #10;
+
+    // Mode 110: Parallel load with left output
+    parallel_in = 4'b1011;
+    mode = 3'b110;
+    #10;
+
+    // Mode 000: Hold
+    mode = 3'b000;
+    #10;
+
+    $finish;
+end
+
+endmodule

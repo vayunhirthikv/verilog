@@ -13,7 +13,7 @@ module moore_seq ( //1011 with overlapping
               S3 = 3,
               S4 = 4;
 
-    reg [2:0] state, next_state;
+    reg [2:0] state, next_state; //not wire
 
     // State register
     always @(posedge clk or posedge reset) begin

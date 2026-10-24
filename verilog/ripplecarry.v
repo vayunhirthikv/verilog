@@ -8,7 +8,7 @@ module ripple_carry_adder_8bit (
     output Cout
 );
 
-    wire c1, c2, c3, c4, c5, c6, c7;
+    wire c1, c2, c3, c4, c5, c6, c7; //bit-1
 
     full_adder f1 (Sum[0], c1, A[0], B[0], Cin);
     full_adder f2 (Sum[1], c2, A[1], B[1], c1);

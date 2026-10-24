@@ -42,3 +42,23 @@ connectivity->generate->all from source->position:minimum seperation : 0.12->tic
                         I/O pins: blue color ->apply
                         Pr boundary: change to width: 5  
                         -> ok
+
+ Core FPGA Chip (AMD / Xilinx Artix-7)Variant: Usually XC7A100T (or the older 50T variant)Logic Cells:
+  ~101,000 logic cells (15,850 logic slices, each containing four 6-input LUTs and 8 flip-flops)   
+  RAM: 4,860 Kbits of fast Block RAM   DSP Slices: 240 dedicated DSP slices for arithmetic/multiply 
+  operationsClock Management: 6 Clock Management Tiles (each with a Phase-Locked Loop / PLL and MMCM); 
+  internal clock speeds exceeding 450 MHz   XADC: Dual-channel, 1 MSPS internal Analog-to-Digital Converter  
+  
+   2. Memory128 MiB DDR2 SDRAM memory128 Mbit Serial Flash memory (Quad-SPI) for storing bitstreams persistentlyMicroSD 
+   card slot for storage expansion3. On-Board User I/O16 Slide Switches and 16 Individual LEDs  
+    2 Tri-color (RGB) LEDsTwo 4-digit 7-segment displays (multiplexed)5 Push buttons (Center, Up, Down, Left, Right)4.
+     Communication & InterfacesUSB-JTAG Programming Circuitry (for programming via Vivado)USB-UART Bridge
+      (for serial terminal communication with a PC)10/100 Ethernet PHY port   USB HID Host 
+      (supports connecting a mouse, keyboard, or flash drive)  
+       5. Audio, Video & Built-in SensorsVGA Port: 12-bit color video output 
+         Audio: PWM audio output amplifier and PDM digital microphone  
+          Sensors: 3-axis accelerometer and internal temperature sensor  
+          
+           6. Expansion PortsFour Pmod Connectors: Standard 12-pin peripheral 
+           modules ports providing 32 total FPGA I/O pinsXADC Pmod Header: Dedicated analog heade
+           r for external analog signals
